@@ -14,6 +14,7 @@ services:
   caddy:
     image: caddy:2-alpine
     command: caddy run
+    working_dir: /etc/caddy
     volumes:
       - caddy_data:/data
       - caddy_config:/config
