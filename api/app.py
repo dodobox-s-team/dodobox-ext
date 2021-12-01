@@ -6,7 +6,7 @@ from api.auth import ALGORITHM, SECRET_KEY, TokenModel
 from api.routers import acmerelay
 from api.routers.acmerelay.request import OVHRequest
 
-app = FastAPI(title="Dodobox External API")
+app = FastAPI(title="Dodobox External API", root_path="/api")
 app.include_router(acmerelay.router)
 
 
