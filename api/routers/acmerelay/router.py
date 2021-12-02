@@ -16,7 +16,7 @@ class Record(BaseModel):
     ttl: int
 
 
-@router.post("/", dependencies=[Depends(is_connected)])
+@router.post("", dependencies=[Depends(is_connected)])
 async def add_record(record: Record, session: ClientSession = Depends(get_session)):
     data = {
         "fieldType": "TXT",
@@ -36,7 +36,7 @@ async def add_record(record: Record, session: ClientSession = Depends(get_sessio
     return {"success": True}
 
 
-@router.delete("/", dependencies=[Depends(is_connected)])
+@router.delete("", dependencies=[Depends(is_connected)])
 async def delete_record(subdomain: str, session: ClientSession = Depends(get_session)):
     data = {
         "fieldType": "TXT",
@@ -44,7 +44,7 @@ async def delete_record(subdomain: str, session: ClientSession = Depends(get_ses
     }
 
     try:
-        async with session.get(f'{OVH_API_BASE_URL}/domain/zone/dodobox.site/record', json=data) as r:
+        async with session.get(f'{OVH_API_BASE_URL}/domain/zone/dodobox.site/record', params=data) as r:
             for id_ in await r.json():
                 async with session.delete(f'{OVH_API_BASE_URL}/domain/zone/dodobox.site/record/{id_}') as r:
                     r.raise_for_status()
