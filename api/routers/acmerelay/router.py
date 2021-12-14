@@ -1,3 +1,5 @@
+import traceback
+
 from aiohttp import ClientResponseError, ClientSession
 from api.auth import is_connected
 from api.routers.acmerelay.request import OVH_API_BASE_URL, get_session
@@ -31,6 +33,7 @@ async def add_record(record: Record, session: ClientSession = Depends(get_sessio
             async with session.post(f'{OVH_API_BASE_URL}/domain/zone/dodobox.site/refresh') as r:
                 r.raise_for_status()
     except ClientResponseError:
+        traceback.print_exc()
         return {"success": False}
 
     return {"success": True}
@@ -52,6 +55,7 @@ async def delete_record(subdomain: str, session: ClientSession = Depends(get_ses
             async with session.post(f'{OVH_API_BASE_URL}/domain/zone/dodobox.site/refresh') as r:
                 r.raise_for_status()
     except ClientResponseError:
+        traceback.print_exc()
         return {"success": False}
 
     return {"sucess": True}
