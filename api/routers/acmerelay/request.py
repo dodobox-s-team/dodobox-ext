@@ -15,6 +15,7 @@ class OVHRequest(ClientRequest):
     OVH_CONSUMER_KEY = os.getenv("OVH_CONSUMER_KEY")
 
     def __init__(self, method: str, url: URL, **kwargs):
+        url = url.with_query(kwargs.pop('params', url.query))
         now = str(int(time.time()))
         data = kwargs.get('data', '') or ''
         signature = hashlib.sha1()
