@@ -1,15 +1,19 @@
-from fastapi import Depends, FastAPI
 import asyncio
+from datetime import datetime, timedelta
+
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt
 
-from api.auth import ALGORITHM, SECRET_KEY, TokenModel
-from api.routers import acmerelay
+from api.auth import ALGORITHM, SECRET_KEY, TOKEN_EXPIRE_MINUTES, TokenModel, cryptctx
+from api.models import UserPass
 from api.models.base import db
+from api.routers import acmerelay, users
 from api.routers.acmerelay.request import OVHRequest
 
 app = FastAPI(title="Dodobox External API")
 app.include_router(acmerelay.router)
+app.include_router(users.router)
 
 
 @app.on_event("startup")
@@ -44,5 +48,14 @@ async def shutdown():
 
 @app.post("/token", tags=["security"], response_model=TokenModel)
 async def create_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    data = {"valid": True}  # replace by user data later
+    user = await UserPass.get(form_data.username)
+    if user is None or not cryptctx.verify(form_data.password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    expire = datetime.now() + timedelta(minutes=TOKEN_EXPIRE_MINUTES)
+    data = {"sub": user.username, "exp": expire}
     return {"access_token": jwt.encode(data, SECRET_KEY, ALGORITHM)}
