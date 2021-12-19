@@ -1,16 +1,31 @@
 version: "3.6"
 
 services:
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASS}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
   api:
     build: ./api
     command: uvicorn api.app:app --host 0.0.0.0 --port 8000 --reload --reload-dir /api
     volumes:
       - ./api:/api
     environment:
+      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@db:5432/${DB_NAME}
       - SECRET_KEY=${SECRET_KEY}
       - OVH_APPLICATION_KEY=${OVH_APPLICATION_KEY}
       - OVH_APPLICATION_SECRET=${OVH_APPLICATION_SECRET}
       - OVH_CONSUMER_KEY=${OVH_CONSUMER_KEY}
+    depends_on:
+      - db
+
   caddy:
     image: caddy:2-alpine
     command: caddy run
@@ -21,6 +36,7 @@ services:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
     environment:
       - DOMAIN_NAME=${DOMAIN_NAME}
+      - API_DOMAIN_NAME=${API_DOMAIN_NAME}
     ports:
       - "443:443"
       - "80:80"
@@ -30,3 +46,4 @@ services:
 volumes:
   caddy_data: {}
   caddy_config: {}
+  postgres_data: {}
