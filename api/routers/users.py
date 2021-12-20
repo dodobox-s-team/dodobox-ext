@@ -1,5 +1,8 @@
-from api.auth import cryptctx, is_connected
-from api.models import User, UserCreation
+from typing import Optional
+
+from api.models import User, UserCreation, UserPass
+from api.routers.auth import Code2FA, hash_password, is_connected
+from api.routers.auth.login import is_connected_pass
 from asyncpg.exceptions import UniqueViolationError
 from fastapi import APIRouter, Depends, HTTPException, status
 
@@ -22,8 +25,15 @@ async def me(user: User = Depends(is_connected)) -> User:
 
 
 @router.delete("/me")
-async def delete_me(user: User = Depends(is_connected)) -> User:
+async def delete_me(twofa: Optional[Code2FA], user: UserPass = Depends(is_connected_pass)) -> User:
     """Delete your user."""
+    if user.totp is not None:
+        if twofa is None or not twofa.verify(user):
+            raise HTTPException(
+                status.HTTP_401_UNAUTHORIZED,
+                "Un code de double authentification valide est requis pour effecteur cette action",
+            )
+
     return await user.delete()
 
 
@@ -39,12 +49,9 @@ async def get_user(id: int) -> User:
 @router.post("/create")
 async def create_account(user: UserCreation) -> User:
     try:
-        user.password = cryptctx.hash(user.password)
+        user.password = hash_password(user.password)
         user = await user.create()
     except UniqueViolationError:
-        raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            "Ce nom d'utilisateur existe déjà."
-        )
+        raise HTTPException(status.HTTP_409_CONFLICT, "Ce nom d'utilisateur existe déjà.")
 
     return user

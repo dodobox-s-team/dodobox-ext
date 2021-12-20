@@ -12,6 +12,7 @@ users = Table(
     Column("email", String(320), nullable=False),
     Column("username", String(20), unique=True, nullable=False),
     Column("password", String, nullable=False),
+    Column("totp", String, nullable=True),
 )
 
 
@@ -39,6 +40,12 @@ class User(UserBase):
         if user := await db.fetch_one(users.delete().where(users.c.id == self.id).returning(users)):
             return User(**user)
 
+    async def enable_2fa(self, totp: str):
+        await db.execute(users.update().values(totp=totp).where(users.c.id == self.id))
+
+    async def disable_2fa(self):
+        await db.execute(users.update().values(totp=None).where(users.c.id == self.id))
+
     @staticmethod
     async def get(username_or_id: Union[int, str]) -> Optional["User"]:
         query = select(users.c.id, users.c.email, users.c.username).select_from(users)
@@ -59,6 +66,8 @@ class User(UserBase):
 
 
 class UserPass(User, UserCreation):
+    totp: Optional[str]
+
     @staticmethod
     async def get(username: str) -> "UserPass":
         if user := await db.fetch_one(users.select().where(users.c.username == username)):

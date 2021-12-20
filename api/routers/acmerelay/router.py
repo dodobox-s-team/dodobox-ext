@@ -1,7 +1,7 @@
 import traceback
 
 from aiohttp import ClientResponseError, ClientSession
-from api.auth import is_connected
+from api.routers.auth import is_connected
 from api.routers.acmerelay.request import OVH_API_BASE_URL, get_session
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, constr
