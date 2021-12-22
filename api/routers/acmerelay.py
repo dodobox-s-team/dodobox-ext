@@ -24,7 +24,7 @@ class Record(BaseModel):
 def is_connected_acme(token: str = Depends(oauth2_scheme)) -> str:
     try:
         _, domain = jwt.decode(token)
-        return domain
+        return domain.removesuffix('.dodobo.site')
     except jwt.TokenError:
         pass
 
@@ -42,7 +42,7 @@ async def add_record(
     scope: str = Depends(is_connected_acme)
 ):
     domain = await Domain.get(record.subdomain)
-    if domain is None or domain.name != scope:
+    if domain is None or domain.name.split(".", 1)[-1] == scope:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Ce nom de domaine ne vous appartient pas.")
 
     try:
@@ -60,7 +60,7 @@ async def delete_record(
     session: ClientSession = Depends(get_session),
     scope: str = Depends(is_connected_acme)
 ):
-    if subdomain != scope:
+    if subdomain.split(".", 1)[-1] != scope:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Ce nom de domaine ne vous appartient pas.")
 
     try:
