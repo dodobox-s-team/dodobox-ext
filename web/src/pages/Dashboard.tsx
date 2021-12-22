@@ -8,7 +8,7 @@ import {
   Spinner,
   Table,
 } from "react-bootstrap";
-import { FaEdit, FaLock, FaTrash, FaUnlock } from "react-icons/fa";
+import { FaCopy, FaEdit, FaLock, FaTrash, FaUnlock } from "react-icons/fa";
 import { Redirect } from "react-router-dom";
 import ModalAddDomain from "../components/ModalAddDomain";
 import ModalDeleteAccount from "../components/ModalDeleteAccount";
@@ -18,6 +18,7 @@ import { requests } from "../env";
 import Domain from "../common/domain";
 import ModalEditDomain from "../components/ModalEditDomain";
 import ModalDeleteDomain from "../components/ModalDeleteDomain";
+import { toast } from "react-toastify";
 
 interface User {
   id: number;
@@ -64,16 +65,33 @@ class Dashboard extends React.Component<{}, DashboardState> {
   disable2fa = () => this.setState({ modal: "disable2fa" });
   deleteAccount = () => this.setState({ modal: "deleteAccount" });
   addDomain = () => this.setState({ modal: "addDomain" });
-  editDomain = (i: number) =>
+  getToken = async (i: number) => {
+    if (!this.state.user) return;
+    try {
+      const domain = this.state.user.domains[i];
+      const r = await requests.get(`/domains/${domain.name}/token`);
+      const token = r.data.token;
+
+      await navigator.clipboard.writeText(token);
+      toast.success(`Le token a été copié dans le presse papier !`);
+    } catch (e) {
+      toast.error(`Une erreur est survenue: ${e}`);
+    }
+  };
+  editDomain = (i: number) => {
+    if (!this.state.user) return;
     this.setState({
       modal: "editDomain",
       domain: this.state.user.domains[i],
     });
-  deleteDomain = (i: number) =>
+  };
+  deleteDomain = (i: number) => {
+    if (!this.state.user) return;
     this.setState({
       modal: "deleteDomain",
       domain: this.state.user.domains[i],
     });
+  };
   closeModal = (success: boolean) => {
     if (success) this.load();
     this.setState({ modal: undefined, domain: undefined });
@@ -174,13 +192,20 @@ class Dashboard extends React.Component<{}, DashboardState> {
                           <td>{domain.ipv4}</td>
                           <td align="right">
                             <Button
-                              onClick={(e) => this.editDomain(i)}
+                              onClick={() => this.getToken(i)}
                               className="me-1"
+                            >
+                              <FaCopy />
+                            </Button>
+                            <Button
+                              onClick={() => this.editDomain(i)}
+                              className="me-1"
+                              variant="secondary"
                             >
                               <FaEdit />
                             </Button>
                             <Button
-                              onClick={(e) => this.deleteDomain(i)}
+                              onClick={() => this.deleteDomain(i)}
                               variant="danger"
                             >
                               <FaTrash />

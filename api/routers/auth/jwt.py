@@ -1,6 +1,6 @@
 import json
 from datetime import datetime, timedelta
-from typing import Union
+from typing import Optional, Union
 
 from jose import JWTError, jwt
 
@@ -21,7 +21,7 @@ class ExpiredToken(TokenError):
     """Raise when the JWT has expired."""
 
 
-def encode(data: Union[str, dict], expire: int, requires_2fa: bool = False) -> str:
+def encode(data: Union[str, dict], expire: Optional[int] = 15, requires_2fa: bool = False) -> str:
     """
     Creates a JWT token with an expire time.
     :param data: subject data. If the provided data is a dict, it will be encoded as json.
@@ -33,7 +33,8 @@ def encode(data: Union[str, dict], expire: int, requires_2fa: bool = False) -> s
     if isinstance(data, dict):
         data = json.dumps(data)
 
-    data = {"sub": data, "exp": datetime.now() + timedelta(minutes=expire)}
+    exp = datetime.max if expire is None else datetime.now() + timedelta(minutes=expire)
+    data = {"sub": data, "exp": exp}
     if requires_2fa:
         data["2fa"] = True
 

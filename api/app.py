@@ -4,8 +4,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.models.base import db
+from api.ovh import OVHRequest
 from api.routers import acmerelay, auth, domains, users
-from api.routers.acmerelay.request import OVHRequest
 
 app = FastAPI(title="Dodobox External API")
 app.add_middleware(

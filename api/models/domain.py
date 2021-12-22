@@ -26,7 +26,6 @@ class DomainBase(DomainEdit):
     async def create(self, uid: int) -> Optional["Domain"]:
         values = self.dict()
         values['ipv4'] = str(self.ipv4)
-        print(values, uid)
 
         if domain := await db.fetch_one(domains.insert().values(uid=uid, **values).returning(domains)):
             return Domain(**domain)

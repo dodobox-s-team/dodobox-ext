@@ -22,7 +22,7 @@ interface CloseCallback {
 
 interface Props {
   show: boolean;
-  domain: Domain;
+  domain?: Domain;
   onClose: CloseCallback;
 }
 
