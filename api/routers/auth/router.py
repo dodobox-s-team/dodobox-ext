@@ -1,4 +1,5 @@
 import json
+from typing import Optional
 
 from api.models import User, UserPass
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -27,7 +28,7 @@ class Create2FA(BaseModel):
 
 
 class Code2FA(BaseModel):
-    code: constr(regex=r"^\d{6}$")  # noqa: F722
+    code: Optional[constr(regex=r"^\d{6}$")]  # noqa: F722
 
     def verify(self, user: UserPass) -> bool:
         otp = totp.TotpFactory.from_json(user.totp)

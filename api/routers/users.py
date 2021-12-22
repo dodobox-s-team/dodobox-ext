@@ -25,10 +25,10 @@ async def me(user: User = Depends(is_connected)) -> User:
 
 
 @router.delete("/me")
-async def delete_me(twofa: Optional[Code2FA], user: UserPass = Depends(is_connected_pass)) -> User:
+async def delete_me(twofa: Code2FA, user: UserPass = Depends(is_connected_pass)) -> User:
     """Delete your user."""
     if user.totp is not None:
-        if twofa is None or not twofa.verify(user):
+        if twofa.code is None or not twofa.verify(user):
             raise HTTPException(
                 status.HTTP_401_UNAUTHORIZED,
                 "Un code de double authentification valide est requis pour effecteur cette action",
