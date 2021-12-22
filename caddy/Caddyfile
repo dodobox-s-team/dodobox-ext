@@ -1,3 +1,7 @@
-{$API_DOMAIN_NAME} {
+{$API_DOMAIN_NAME}:{$API_PORT} {
 	reverse_proxy api:8000
+}
+
+{$API_DOMAIN_NAME}:{$WEB_PORT} {
+	reverse_proxy web:3000
 }

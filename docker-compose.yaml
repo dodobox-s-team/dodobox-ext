@@ -29,6 +29,16 @@ services:
     depends_on:
       - db
 
+  web:
+    build: ./web
+    environment:
+      - WEB_DOMAIN_NAME=${WEB_DOMAIN_NAME}
+      - API_DOMAIN_NAME=${API_DOMAIN_NAME}
+      - API_PORT=${API_PORT}
+      - WEB_PORT=${WEB_PORT}
+    volumes:
+      - ./web/src:/app/src
+
   caddy:
     image: caddy:2-alpine
     command: caddy run
@@ -38,13 +48,16 @@ services:
       - caddy_config:/config
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
     environment:
-      - DOMAIN_NAME=${DOMAIN_NAME}
+      - WEB_DOMAIN_NAME=${WEB_DOMAIN_NAME}
       - API_DOMAIN_NAME=${API_DOMAIN_NAME}
+      - API_PORT=${API_PORT}
+      - WEB_PORT=${WEB_PORT}
     ports:
-      - "443:443"
-      - "80:80"
+      - "${API_PORT}:${API_PORT}"
+      - "${WEB_PORT}:${WEB_PORT}"
     depends_on:
       - api
+      - web
 
 volumes:
   caddy_data: {}

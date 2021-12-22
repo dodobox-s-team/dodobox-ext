@@ -1,0 +1,10 @@
+// color to use
+$primary: #000246;
+
+// delete horizontal scrollbar
+body {
+  overflow-x: hidden;
+}
+
+@import "../node_modules/bootstrap/scss/bootstrap";
+@import "../node_modules/react-toastify/scss/main";
