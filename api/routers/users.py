@@ -1,7 +1,7 @@
 from typing import Optional
 
 from api.models import User, UserCreation, UserPass
-from api.routers.auth import Code2FA, hash_password, is_connected
+from api.routers.auth import Code2FA, hash_password
 from api.routers.auth.login import is_connected_pass
 from asyncpg.exceptions import UniqueViolationError
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -12,6 +12,10 @@ router = APIRouter(
 )
 
 
+class User2FA(User):
+    has2fa: bool
+
+
 @router.get("")
 async def get_all() -> list[User]:
     """Return user's info"""
@@ -19,9 +23,9 @@ async def get_all() -> list[User]:
 
 
 @router.get("/me")
-async def me(user: User = Depends(is_connected)) -> User:
+async def me(user: UserPass = Depends(is_connected_pass)) -> User2FA:
     """Return current user's info"""
-    return user
+    return User2FA(has2fa=user.totp is not None, **user.dict())
 
 
 @router.delete("/me")
