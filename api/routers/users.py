@@ -1,6 +1,5 @@
-from typing import Optional
-
 from api.models import User, UserCreation, UserPass
+from api.models.domain import Domain, DomainBase
 from api.routers.auth import Code2FA, hash_password
 from api.routers.auth.login import is_connected_pass
 from asyncpg.exceptions import UniqueViolationError
@@ -12,8 +11,9 @@ router = APIRouter(
 )
 
 
-class User2FA(User):
+class UserInfo(User):
     has2fa: bool
+    domains: list[DomainBase]
 
 
 @router.get("", response_model=list[User])
@@ -22,10 +22,11 @@ async def get_all() -> list[User]:
     return await User.get_all()
 
 
-@router.get("/me", response_model=User2FA)
-async def me(user: UserPass = Depends(is_connected_pass)) -> User2FA:
+@router.get("/me", response_model=UserInfo)
+async def me(user: UserPass = Depends(is_connected_pass)) -> UserInfo:
     """Return current user's info"""
-    return User2FA(has2fa=user.totp is not None, **user.dict())
+    domains = await Domain.get_from(user.id)
+    return UserInfo(has2fa=user.totp is not None, domains=domains, **user.dict())
 
 
 @router.delete("/me", response_model=User)

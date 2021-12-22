@@ -33,8 +33,8 @@ interface State {
 class ModalEnable2FA extends React.Component<Props, State> {
   state: State = {};
 
-  componentDidMount() {
-    this.load();
+  componentDidUpdate(props: Props) {
+    if (this.props.show && !props.show) this.load();
   }
 
   load() {
