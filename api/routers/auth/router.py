@@ -63,7 +63,7 @@ async def authenticate(form_data: OAuth2PasswordRequestForm = Depends()):
     return login(user)
 
 
-@router.get("/2fa/new")
+@router.get("/2fa/new", response_model=Create2FA)
 async def new_2fa(user: User = Depends(is_connected)):
     otp = totp.TotpFactory.new()
     uri = otp.to_uri(label=user.username)
@@ -105,7 +105,7 @@ async def disable_2fa(twofa: Code2FA, user: UserPass = Depends(is_connected_pass
         await user.disable_2fa()
 
 
-@router.post("/2fa/verify")
+@router.post("/2fa/verify", response_model=TokenModel)
 async def verify_2fa(twofa: Code2FA, token: str = Depends(oauth2_scheme)):
     try:
         req_2fa, username = jwt.decode(token)

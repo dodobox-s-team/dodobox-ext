@@ -16,19 +16,19 @@ class User2FA(User):
     has2fa: bool
 
 
-@router.get("")
+@router.get("", response_model=list[User])
 async def get_all() -> list[User]:
     """Return user's info"""
     return await User.get_all()
 
 
-@router.get("/me")
+@router.get("/me", response_model=User2FA)
 async def me(user: UserPass = Depends(is_connected_pass)) -> User2FA:
     """Return current user's info"""
     return User2FA(has2fa=user.totp is not None, **user.dict())
 
 
-@router.delete("/me")
+@router.delete("/me", response_model=User)
 async def delete_me(twofa: Code2FA, user: UserPass = Depends(is_connected_pass)) -> User:
     """Delete your user."""
     if user.totp is not None:
@@ -41,7 +41,7 @@ async def delete_me(twofa: Code2FA, user: UserPass = Depends(is_connected_pass))
     return await user.delete()
 
 
-@router.get("/{id}")
+@router.get("/{id}", response_model=User)
 async def get_user(id: int) -> User:
     """Return a user's info from its id"""
     if user := await User.get(id):
@@ -50,7 +50,7 @@ async def get_user(id: int) -> User:
     raise HTTPException(status.HTTP_404_NOT_FOUND, "Cet utilisateur n'existe pas.")
 
 
-@router.post("/create")
+@router.post("/create", response_model=User)
 async def create_account(user: UserCreation) -> User:
     try:
         user.password = hash_password(user.password)
