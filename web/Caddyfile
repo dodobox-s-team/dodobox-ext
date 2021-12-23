@@ -3,6 +3,9 @@
 }
 
 {$WEB_DOMAIN_NAME} {
-	root * /app
-	try_files {path} /
+	handle {
+		root * /app
+		try_files {path} /index.html
+		file_server
+	}
 }
