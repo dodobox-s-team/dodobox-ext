@@ -21,7 +21,7 @@ class DomainEdit(BaseModel):
 
 
 class DomainBase(DomainEdit):
-    name: constr(min_length=3, max_length=20)
+    name: constr(min_length=3, max_length=33)
 
     async def create(self, uid: int) -> Optional["Domain"]:
         values = self.dict()
