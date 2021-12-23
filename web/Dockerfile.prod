@@ -1,0 +1,17 @@
+FROM node:lts-alpine as build-stage
+WORKDIR /app
+
+COPY ["package.json", "yarn.lock", "./"]
+RUN yarn && \
+    yarn cache clean
+
+COPY . .
+
+RUN yarn build
+
+FROM caddy:2-alpine as caddy
+
+COPY --from=build-stage /app/dist /app
+COPY ./Caddyfile /etc/caddy/Caddyfile
+
+WORKDIR /etc/caddy

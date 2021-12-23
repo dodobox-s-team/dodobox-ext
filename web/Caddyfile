@@ -1,0 +1,8 @@
+{$API_DOMAIN_NAME} {
+	reverse_proxy api:8000
+}
+
+{$WEB_DOMAIN_NAME} {
+	root * /app
+	file_server
+}
