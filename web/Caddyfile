@@ -6,6 +6,7 @@
 	handle {
 		root * /app
 		try_files {path} /index.html
+		encode gzip zstd
 		file_server
 	}
 }
