@@ -35,6 +35,8 @@ class ModalEditDomain extends React.Component<Props, State> {
 
   submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!this.props.domain) return;
+
     const target = e.target as typeof e.target & {
       ipv4: { value: string };
     };

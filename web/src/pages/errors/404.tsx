@@ -11,7 +11,7 @@ class PageNotFound extends React.Component<
     counter: 0,
   };
 
-  private _interval?: number = undefined;
+  private _interval?: any = undefined;
   componentDidMount() {
     this._interval = setInterval(() => {
       if (this.state.counter == 404) {

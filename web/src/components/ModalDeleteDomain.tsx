@@ -34,6 +34,8 @@ class ModalDeleteDomain extends React.Component<Props, State> {
 
   submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!this.props.domain) return;
+
     requests
       .delete(`/domains/${this.props.domain.name}`)
       .then((r) => {
